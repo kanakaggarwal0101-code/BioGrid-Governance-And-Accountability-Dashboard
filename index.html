@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioGrid Governance Dashboard - MoAFW</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --navy: #1a3a5c; --navy-dark: #0f2540; --navy-mid: #245080;
+  --blue-light: #e8f0f7; --blue-lighter: #f4f7fb;
+  --accent: #c8832a;
+  --green: #2e7d52; --green-light: #eaf4ee;
+  --red: #b52a2a; --red-light: #fdf0f0;
+  --amber: #a06b00; --amber-light: #fef8ec;
+  --text: #1a1a1a; --text-mid: #4a5568; --text-light: #718096;
+  --border: #d0dae8; --border-light: #e8eef5;
+  --bg: #f0f4f8; --white: #ffffff;
+}
+body { font-family: 'Noto Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+/* HEADER */
+.gov-header-top { background: var(--navy-dark); padding: 10px 32px; display: flex; align-items: center; gap: 16px; border-bottom: 3px solid var(--accent); }
+.gov-logo { display: flex; align-items: center; gap: 14px; }
+.gov-titles .ministry { font-family: 'Noto Serif', serif; font-size: 13px; color: #c8d8e8; letter-spacing: 0.3px; }
+.gov-titles .portal { font-size: 15px; color: white; font-weight: 700; margin: 2px 0; font-family: 'Noto Serif', serif; }
+.gov-titles .dept { font-size: 11px; color: #8aaac8; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+.live-ind { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8aaac8; }
+.live-dot { width: 7px; height: 7px; background: #4caf79; border-radius: 50%; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.ts { font-size: 11px; color: #8aaac8; }
+.user-chip { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 3px; font-size: 12px; color: #c8d8e8; display: flex; align-items: center; gap: 6px; }
+
+/* NAV */
+.nav-bar { background: var(--navy); padding: 0 32px; display: flex; }
+.nav-item { padding: 12px 18px; font-size: 13px; color: #a8c0d8; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.nav-item:hover { color: #e8f0f8; background: rgba(255,255,255,0.05); }
+.nav-item.active { color: #fff; border-bottom-color: var(--accent); background: rgba(255,255,255,0.06); }
+
+/* ALERT */
+.alert-bar { background: #fff8e6; border-bottom: 1px solid #f0d080; padding: 9px 32px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.alert-bar .tag { background: var(--amber); color: white; padding: 2px 8px; border-radius: 2px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.alert-bar .msg { color: #5a4500; flex: 1; }
+.alert-bar .close { color: #a08040; cursor: pointer; font-size: 18px; padding: 0 4px; line-height: 1; }
+
+/* PAGE */
+.page { padding: 24px 32px; }
+.page-title { font-family: 'Noto Serif', serif; font-size: 20px; color: var(--navy-dark); font-weight: 600; margin-bottom: 4px; }
+.page-subtitle { font-size: 12px; color: var(--text-light); margin-bottom: 20px; }
+
+/* KPI */
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
+.kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; border-left: 4px solid var(--navy-mid); }
+.kpi-card.green { border-left-color: var(--green); }
+.kpi-card.amber { border-left-color: var(--accent); }
+.kpi-card.red { border-left-color: var(--red); }
+.kpi-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 500; }
+.kpi-value { font-size: 26px; font-weight: 700; color: var(--navy-dark); line-height: 1; margin-bottom: 5px; }
+.kpi-card.green .kpi-value { color: var(--green); }
+.kpi-card.amber .kpi-value { color: var(--accent); }
+.kpi-card.red .kpi-value { color: var(--red); }
+.kpi-sub { font-size: 11px; color: var(--text-light); }
+.kpi-sub.up { color: var(--green); } .kpi-sub.dn { color: var(--red); }
+
+/* LAYOUT */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-3-2 { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; margin-bottom: 16px; }
+.col { display: flex; flex-direction: column; gap: 16px; }
+
+/* PANEL */
+.panel { background: var(--white); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+.panel:last-child { margin-bottom: 0; }
+.panel-head { padding: 11px 18px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; background: var(--blue-lighter); }
+.panel-title { font-size: 13px; font-weight: 600; color: var(--navy-dark); display: flex; align-items: center; gap: 7px; }
+.panel-actions { display: flex; gap: 8px; align-items: center; }
+.btn-sm { padding: 4px 12px; font-size: 11px; border: 1px solid var(--border); background: white; color: var(--navy); border-radius: 3px; cursor: pointer; font-family: inherit; transition: all 0.12s; }
+.btn-sm:hover { background: var(--blue-light); border-color: var(--navy-mid); }
+.badge { padding: 2px 8px; border-radius: 2px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.b-green { background: var(--green-light); color: var(--green); border: 1px solid #b8dcc8; }
+.b-amber { background: var(--amber-light); color: var(--amber); border: 1px solid #e8c878; }
+.b-red { background: var(--red-light); color: var(--red); border: 1px solid #e8b8b8; }
+.b-navy { background: var(--blue-light); color: var(--navy); border: 1px solid var(--border); }
+.panel-body { padding: 16px 18px; }
+.panel-body.np { padding: 0; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { background: var(--blue-lighter); padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.data-table th.r { text-align: right; }
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--text); vertical-align: middle; }
+.data-table td.r { text-align: right; font-weight: 500; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--blue-lighter); }
+.cp { font-weight: 600; color: var(--navy-dark); }
+.cs { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+/* STATUS */
+.status { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+.sd { width: 5px; height: 5px; border-radius: 50%; }
+.operational { background: var(--green-light); color: var(--green); }
+.operational .sd { background: var(--green); }
+.warning { background: var(--amber-light); color: var(--amber); }
+.warning .sd { background: var(--accent); }
+.critical { background: var(--red-light); color: var(--red); }
+.critical .sd { background: var(--red); }
+
+/* UTIL BAR */
+.uw { display: flex; align-items: center; gap: 8px; }
+.ub { flex: 1; height: 5px; background: var(--border-light); border-radius: 3px; overflow: hidden; min-width: 60px; }
+.uf { height: 100%; border-radius: 3px; }
+.good { background: var(--green); } .mid { background: var(--accent); } .bad { background: var(--red); }
+.up2 { font-size: 12px; color: var(--text-mid); font-weight: 500; min-width: 32px; text-align: right; }
+
+/* GRANTS */
+.grant-item { padding: 13px 0; border-bottom: 1px solid var(--border-light); display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+.grant-item:last-child { border-bottom: none; }
+.gn { font-size: 13px; font-weight: 600; color: var(--navy-dark); margin-bottom: 2px; }
+.gm { font-size: 11px; color: var(--text-light); margin-bottom: 8px; }
+.gbr { display: flex; align-items: center; gap: 8px; }
+.gb { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+.gf { height: 100%; border-radius: 3px; }
+.gp { font-size: 11px; color: var(--text-mid); font-weight: 600; min-width: 30px; }
+.gv { font-size: 22px; font-weight: 700; color: var(--navy-dark); text-align: right; }
+.gu { font-size: 10px; color: var(--text-light); text-align: right; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* MAP */
+.map-area { background: #dce8f0; border: 1px solid var(--border); border-radius: 3px; height: 210px; position: relative; overflow: hidden; margin-bottom: 10px; }
+.map-area svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hub-dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.3); transform: translate(-50%,-50%); transition: transform 0.15s; }
+.hub-dot:hover { transform: translate(-50%,-50%) scale(1.4); }
+.hub-dot.ok { background: var(--green); }
+.hub-dot.warn { background: var(--accent); }
+.hub-dot.crit { background: var(--red); }
+.map-legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-mid); margin-bottom: 14px; }
+.ml-item { display: flex; align-items: center; gap: 5px; }
+.ml-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+/* LPI */
+.lpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lpi-card { background: var(--blue-lighter); border: 1px solid var(--border-light); border-radius: 3px; padding: 12px; }
+.lpi-lbl { font-size: 10px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600; }
+.lpi-row { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
+.lpi-val { font-size: 24px; font-weight: 700; color: var(--navy-dark); line-height: 1; }
+.lpi-of { font-size: 11px; color: var(--text-light); margin-bottom: 3px; }
+.lpi-tgt { font-size: 10px; color: var(--green); font-weight: 600; margin-bottom: 6px; }
+.lpi-prog { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.lpi-fill { height: 100%; background: var(--navy-mid); border-radius: 2px; }
+
+/* CLIMATE */
+.climate-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.climate-card { background: var(--green-light); border: 1px solid #b8dcc8; border-radius: 3px; padding: 14px; text-align: center; }
+.cv { font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+.cl { font-size: 10px; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
+
+/* RISK */
+.risk-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-light); align-items: flex-start; }
+.risk-item:last-child { border-bottom: none; }
+.risk-bar { width: 4px; min-height: 44px; border-radius: 2px; flex-shrink: 0; margin-top: 2px; }
+.risk-bar.high { background: var(--red); } .risk-bar.med { background: var(--accent); } .risk-bar.low { background: var(--green); }
+.rn { font-size: 13px; font-weight: 600; color: var(--navy-dark); margin-bottom: 3px; }
+.rd { font-size: 12px; color: var(--text-mid); }
+.rab { margin-left: auto; padding: 4px 12px; font-size: 11px; border: 1px solid var(--border); background: white; color: var(--navy); border-radius: 3px; cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+.rab:hover { background: var(--blue-light); }
+
+/* MITIGATION */
+.mc { background: var(--blue-lighter); border: 1px solid var(--border-light); border-radius: 3px; padding: 14px; margin-bottom: 10px; }
+.mc:last-child { margin-bottom: 0; }
+.ml2 { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600; }
+.mv { font-size: 26px; font-weight: 700; color: var(--navy-dark); margin-bottom: 4px; }
+.md { font-size: 12px; color: var(--text-mid); margin-bottom: 8px; }
+.mp { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.mf { height: 100%; border-radius: 3px; background: var(--navy-mid); }
+
+/* GRADE */
+.gp2 { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 11px; font-weight: 700; }
+.gA { background: var(--green-light); color: var(--green); border: 1px solid #b8dcc8; }
+.gB { background: var(--amber-light); color: var(--amber); border: 1px solid #e8c878; }
+.gC { background: var(--red-light); color: var(--red); border: 1px solid #e8b8b8; }
+.tok { color: var(--green); font-weight: 500; font-size: 12px; }
+.twarn { color: var(--amber); font-weight: 500; font-size: 12px; }
+.tbad { color: var(--red); font-weight: 500; font-size: 12px; }
+
+/* INFOBOX */
+.infobox { background: var(--blue-light); border: 1px solid var(--border); border-left: 3px solid var(--navy-mid); padding: 10px 14px; border-radius: 0 3px 3px 0; font-size: 12px; color: var(--navy-dark); margin-top: 12px; }
+
+/* SECTION HEAD */
+.sh { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-light); padding: 4px 0 10px; border-bottom: 1px solid var(--border-light); margin-bottom: 14px; }
+
+/* TABS */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* FOOTER */
+.footer { background: var(--navy-dark); color: #8aaac8; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; border-top: 3px solid var(--accent); }
+.footer-links { display: flex; gap: 20px; }
+.fl { color: #8aaac8; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.fl:hover { color: #c8d8e8; }
+
+/* SUMMARY BAR */
+.sum-bar { background: var(--blue-lighter); border-top: 1px solid var(--border-light); padding: 12px 18px; display: grid; gap: 10px; }
+.sb-val { font-size: 20px; font-weight: 700; color: var(--navy-dark); }
+.sb-lbl { font-size: 10px; text-transform: uppercase; color: var(--text-light); letter-spacing: 0.5px; }
+
+/* EVAL TABLE */
+.eval-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.eval-table th { background: var(--blue-lighter); padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); }
+.eval-table th.r { text-align: right; }
+.eval-table td { padding: 11px 14px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+.eval-table td.r { text-align: right; font-weight: 600; }
+.eval-table tr:last-child td { border-bottom: none; }
+.eval-table tr:hover td { background: var(--blue-lighter); }
+.em-name { font-size: 13px; font-weight: 600; color: var(--navy-dark); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="gov-header-top">
+  <div class="gov-logo">
+    <svg width="46" height="46" viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="44" stroke="#c8a84b" stroke-width="2" fill="none"/>
+      <circle cx="50" cy="50" r="8" fill="#c8a84b"/>
+      <circle cx="50" cy="50" r="3.5" fill="#0f2540"/>
+      <g stroke="#c8a84b" stroke-width="1.2">
+        <line x1="50" y1="42" x2="50" y2="10"/><line x1="50" y1="58" x2="50" y2="90"/>
+        <line x1="42" y1="50" x2="10" y2="50"/><line x1="58" y1="50" x2="90" y2="50"/>
+        <line x1="44.3" y1="44.3" x2="21" y2="21"/><line x1="55.7" y1="55.7" x2="79" y2="79"/>
+        <line x1="55.7" y1="44.3" x2="79" y2="21"/><line x1="44.3" y1="55.7" x2="21" y2="79"/>
+        <line x1="41.8" y1="46" x2="12" y2="29"/><line x1="58.2" y1="54" x2="88" y2="71"/>
+        <line x1="54" y1="41.8" x2="71" y2="12"/><line x1="46" y1="58.2" x2="29" y2="88"/>
+        <line x1="46" y1="41.8" x2="29" y2="12"/><line x1="54" y1="58.2" x2="71" y2="88"/>
+        <line x1="58.2" y1="46" x2="88" y2="29"/><line x1="41.8" y1="54" x2="12" y2="71"/>
+      </g>
+      <circle cx="50" cy="10" r="2.2" fill="#c8a84b"/><circle cx="50" cy="90" r="2.2" fill="#c8a84b"/>
+      <circle cx="10" cy="50" r="2.2" fill="#c8a84b"/><circle cx="90" cy="50" r="2.2" fill="#c8a84b"/>
+      <circle cx="21" cy="21" r="2.2" fill="#c8a84b"/><circle cx="79" cy="79" r="2.2" fill="#c8a84b"/>
+      <circle cx="79" cy="21" r="2.2" fill="#c8a84b"/><circle cx="21" cy="79" r="2.2" fill="#c8a84b"/>
+    </svg>
+    <div class="gov-titles">
+      <div class="ministry">&#2349;&#2366;&#2352;&#2340; &#2360;&#2352;&#2325;&#2366;&#2352; &nbsp;&#183;&nbsp; Government of India</div>
+      <div class="portal">Ministry of Agriculture &amp; Farmers Welfare</div>
+      <div class="dept">BioGrid Governance &amp; Accountability Dashboard &nbsp;&#183;&nbsp; Restricted Access</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-ind"><div class="live-dot"></div> Live Data Feed</div>
+    <div class="ts" id="ts">Loading...</div>
+    <div class="user-chip">&#127963; Jt. Secretary, Agri Infrastructure</div>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <div class="nav-item active" onclick="go('overview',this)">&#8862; Overview</div>
+  <div class="nav-item" onclick="go('hubs',this)">&#8857; Hub Network</div>
+  <div class="nav-item" onclick="go('finance',this)">&#8377; Grant &amp; Finance</div>
+  <div class="nav-item" onclick="go('compliance',this)">&#8801; Batch Compliance</div>
+  <div class="nav-item" onclick="go('risk',this)">&#9873; Risk Register</div>
+  <div class="nav-item" onclick="go('roadmap',this)">&#8599; Evaluation Metrics</div>
+</nav>
+
+<!-- ALERT -->
+<div class="alert-bar" id="alertBar">
+  <span class="tag">&#9888; Action Required</span>
+  <span class="msg">Hub MH-07 (Nashik, Maharashtra) has reported sub-threshold utilisation for 14 consecutive days. AIF debt servicing gap of Rs. 1.2 Cr/quarter projected. District Collector review recommended.</span>
+  <span class="close" onclick="document.getElementById('alertBar').style.display='none'">&#10005;</span>
+</div>
+
+<!-- ============ OVERVIEW ============ -->
+<div id="tab-overview" class="tab-content active">
+<div class="page">
+  <div class="page-title">National Deployment Overview</div>
+  <div class="page-subtitle">Data as of <span id="dateStr">Loading...</span> &nbsp;&#183;&nbsp; Refreshed every 15 minutes &nbsp;&#183;&nbsp; Source: BioGrid Hub IoT Network + NIC Data Exchange</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Operational Hubs</div><div class="kpi-value">47</div><div class="kpi-sub up">&#9650; +6 this quarter</div></div>
+    <div class="kpi-card"><div class="kpi-label">Farmers Served (MTD)</div><div class="kpi-value">28,400</div><div class="kpi-sub up">&#9650; +12% month-on-month</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">AIF Disbursed</div><div class="kpi-value">Rs. 312 Cr</div><div class="kpi-sub">of Rs. 500 Cr sanctioned</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Avg. Hub Utilisation</div><div class="kpi-value">73%</div><div class="kpi-sub">Target: 80% (Phase 1)</div></div>
+    <div class="kpi-card red"><div class="kpi-label">Hubs Below Threshold</div><div class="kpi-value">4</div><div class="kpi-sub dn">&#9650; +1 since last week</div></div>
+  </div>
+
+  <!-- MAP + STATE TABLE left, SCHEME + LPI right -->
+  <div class="grid-3-2">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">&#8857; Geographic Distribution: LM-CCE Hubs</div>
+        <div class="panel-actions"><span class="badge b-green">47 Live</span><button class="btn-sm">Export KML</button></div>
+      </div>
+      <div class="panel-body">
+        <!-- India map -->
+        <div class="map-area">
+          <svg viewBox="0 0 320 210"><rect width="320" height="210" fill="#dce8f0"/>
+            <polygon points="118,16 158,12 180,24 192,42 198,68 210,96 220,126 204,156 180,178 160,188 142,183 124,164 100,144 80,120 70,94 74,68 86,43" fill="#c8d8e4" stroke="#a0b8c8" stroke-width="1.2"/>
+            <line x1="118" y1="16" x2="158" y2="12" stroke="#b0c8d8" stroke-width="0.5"/>
+            <line x1="140" y1="72" x2="198" y2="70" stroke="#b0c8d8" stroke-width="0.5"/>
+            <line x1="88" y1="108" x2="212" y2="104" stroke="#b0c8d8" stroke-width="0.5"/>
+            <line x1="100" y1="138" x2="206" y2="134" stroke="#b0c8d8" stroke-width="0.5"/>
+            <text x="232" y="28" font-size="7" fill="#8aaac0" font-family="sans-serif">INDIA</text>
+            <text x="136" y="84" font-size="6" fill="#6888a0">MP</text>
+            <text x="126" y="112" font-size="6" fill="#6888a0">MH</text>
+            <text x="158" y="56" font-size="6" fill="#6888a0">UP</text>
+            <text x="156" y="142" font-size="6" fill="#6888a0">AP</text>
+            <text x="148" y="164" font-size="6" fill="#6888a0">KA</text>
+            <text x="116" y="50" font-size="6" fill="#6888a0">GJ</text>
+            <text x="174" y="44" font-size="6" fill="#6888a0">BR</text>
+          </svg>
+          <div class="hub-dot ok" style="left:57%;top:28%"></div>
+          <div class="hub-dot ok" style="left:53%;top:22%"></div>
+          <div class="hub-dot ok" style="left:45%;top:55%"></div>
+          <div class="hub-dot crit" style="left:47%;top:61%"></div>
+          <div class="hub-dot ok" style="left:63%;top:32%"></div>
+          <div class="hub-dot warn" style="left:64%;top:40%"></div>
+          <div class="hub-dot ok" style="left:65%;top:55%"></div>
+          <div class="hub-dot ok" style="left:53%;top:68%"></div>
+          <div class="hub-dot ok" style="left:59%;top:75%"></div>
+          <div class="hub-dot warn" style="left:38%;top:50%"></div>
+          <div class="hub-dot ok" style="left:55%;top:47%"></div>
+          <div style="position:absolute;left:49%;top:63%;font-size:9px;color:#b52a2a;font-weight:700;pointer-events:none;white-space:nowrap">&#9888; MH-07</div>
+        </div>
+        <!-- Legend -->
+        <div class="map-legend">
+          <div class="ml-item"><div class="ml-dot" style="background:var(--green)"></div> Operational</div>
+          <div class="ml-item"><div class="ml-dot" style="background:var(--accent)"></div> Under Review</div>
+          <div class="ml-item"><div class="ml-dot" style="background:var(--red)"></div> Critical</div>
+        </div>
+        <!-- State breakdown fills the rest of the panel -->
+        <table class="data-table">
+          <thead><tr><th>State</th><th class="r">Hubs</th><th class="r">Farmers/Mo</th><th style="width:110px">Utilisation</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><div class="cp">Uttar Pradesh</div></td><td class="r">11</td><td class="r">6,800</td><td><div class="uw"><div class="ub"><div class="uf good" style="width:84%"></div></div><span class="up2">84%</span></div></td><td><span class="status operational"><div class="sd"></div>On Target</span></td></tr>
+            <tr><td><div class="cp">Haryana</div></td><td class="r">5</td><td class="r">3,100</td><td><div class="uw"><div class="ub"><div class="uf good" style="width:91%"></div></div><span class="up2">91%</span></div></td><td><span class="status operational"><div class="sd"></div>On Target</span></td></tr>
+            <tr><td><div class="cp">Karnataka</div></td><td class="r">6</td><td class="r">3,500</td><td><div class="uw"><div class="ub"><div class="uf good" style="width:78%"></div></div><span class="up2">78%</span></div></td><td><span class="status operational"><div class="sd"></div>On Target</span></td></tr>
+            <tr><td><div class="cp">Maharashtra</div></td><td class="r">9</td><td class="r">4,200</td><td><div class="uw"><div class="ub"><div class="uf mid" style="width:68%"></div></div><span class="up2">68%</span></div></td><td><span class="status warning"><div class="sd"></div>Review</span></td></tr>
+            <tr><td><div class="cp">Tamil Nadu</div></td><td class="r">5</td><td class="r">3,100</td><td><div class="uw"><div class="ub"><div class="uf mid" style="width:71%"></div></div><span class="up2">71%</span></div></td><td><span class="status warning"><div class="sd"></div>Review</span></td></tr>
+            <tr><td><div class="cp">Bihar</div></td><td class="r">7</td><td class="r">2,900</td><td><div class="uw"><div class="ub"><div class="uf bad" style="width:54%"></div></div><span class="up2">54%</span></div></td><td><span class="status critical"><div class="sd"></div>Critical</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Scheme Utilisation + LPI -->
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">&#8377; Scheme Utilisation</div><button class="btn-sm">Full Report</button></div>
+        <div class="panel-body">
+          <div class="grant-item">
+            <div><div class="gn">Agricultural Infrastructure Fund (AIF)</div><div class="gm">Rs. 1,00,000 Cr corpus &nbsp;&#183;&nbsp; 3% interest subvention &nbsp;&#183;&nbsp; 47 hub projects</div>
+            <div class="gbr"><div class="gb"><div class="gf" style="width:62%;background:var(--navy-mid)"></div></div><span class="gp">62%</span></div></div>
+            <div><div class="gv">Rs. 312 Cr</div><div class="gu">Disbursed</div></div>
+          </div>
+          <div class="grant-item">
+            <div><div class="gn">PMKSY: Cold Chain Component</div><div class="gm">35-50% grant-in-aid &nbsp;&#183;&nbsp; Max Rs. 10 Cr/project &nbsp;&#183;&nbsp; 29 approved</div>
+            <div class="gbr"><div class="gb"><div class="gf" style="width:79%;background:var(--green)"></div></div><span class="gp">79%</span></div></div>
+            <div><div class="gv">Rs. 84 Cr</div><div class="gu">Disbursed</div></div>
+          </div>
+          <div class="grant-item">
+            <div><div class="gn">MIDH: Packhouse / NHM</div><div class="gm">60:40 Centre:State &nbsp;&#183;&nbsp; Credit-linked subsidy &nbsp;&#183;&nbsp; 18 projects</div>
+            <div class="gbr"><div class="gb"><div class="gf" style="width:41%;background:var(--accent)"></div></div><span class="gp">41%</span></div></div>
+            <div><div class="gv">Rs. 37 Cr</div><div class="gu">Disbursed</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">&#127760; World Bank LPI Progress</div><span class="badge b-navy">Target: Rank 25</span></div>
+        <div class="panel-body" style="padding:12px 14px">
+          <div class="lpi-grid">
+            <div class="lpi-card"><div class="lpi-lbl">Global Rank</div><div class="lpi-row"><div class="lpi-val">38</div><div class="lpi-of">/139</div></div><div class="lpi-tgt">Target: 25</div><div class="lpi-prog"><div class="lpi-fill" style="width:55%"></div></div></div>
+            <div class="lpi-card"><div class="lpi-lbl">Tracking Score</div><div class="lpi-row"><div class="lpi-val">3.2</div><div class="lpi-of">/5.0</div></div><div class="lpi-tgt">Target: 4.0</div><div class="lpi-prog"><div class="lpi-fill" style="width:64%"></div></div></div>
+            <div class="lpi-card"><div class="lpi-lbl">Shipment Quality</div><div class="lpi-row"><div class="lpi-val">3.0</div><div class="lpi-of">/5.0</div></div><div class="lpi-tgt">Target: 3.8</div><div class="lpi-prog"><div class="lpi-fill" style="width:60%"></div></div></div>
+            <div class="lpi-card"><div class="lpi-lbl">Cold Chain Compliance</div><div class="lpi-row"><div class="lpi-val">2.8</div><div class="lpi-of">/5.0</div></div><div class="lpi-tgt">Target: 4.2</div><div class="lpi-prog"><div class="lpi-fill" style="width:46%;background:var(--accent)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIMATE - full width -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">&#127807; Climate &amp; Sustainability Outcomes</div><span class="badge b-green">Net Zero 2070 Aligned</span></div>
+    <div class="panel-body">
+      <div class="climate-row">
+        <div class="climate-card"><div class="cv">8,400</div><div class="cl">Tonnes CO2<br>Avoided (MTD)</div></div>
+        <div class="climate-card"><div class="cv">64,000</div><div class="cl">Litres Diesel<br>Eliminated</div></div>
+        <div class="climate-card"><div class="cv">31%</div><div class="cl">Food Loss<br>Reduction</div></div>
+        <div class="climate-card"><div class="cv">91%</div><div class="cl">Zero-GWP<br>Cooling Adoption</div></div>
+        <div class="climate-card"><div class="cv">16%</div><div class="cl">Supply Chain<br>CO2 Reduction Target</div></div>
+      </div>
+      <div class="infobox"><strong>Net Zero 2070:</strong> Phase 1 target of 16% supply-chain emission reduction is on track. GreenCHILL bio-cooling (ammonia-based, GWP = 0) deployed in 91% of hubs, replacing diesel compressors.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============ HUB NETWORK ============ -->
+<div id="tab-hubs" class="tab-content">
+<div class="page">
+  <div class="page-title">Hub Network: LM-CCE Registry</div>
+  <div class="page-subtitle">Individual hub-level performance monitoring across all operational districts</div>
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">&#128203; All Hubs: Performance Snapshot</div>
+      <div class="panel-actions"><button class="btn-sm">Export CSV</button><button class="btn-sm">Flag Selected</button></div>
+    </div>
+    <div class="panel-body np">
+      <table class="data-table">
+        <thead><tr><th>Hub ID / Location</th><th class="r">Capacity</th><th style="width:145px">Utilisation</th><th class="r">Farmers/Mo</th><th class="r">Wastage &#8595;</th><th class="r">Revenue (Rs.L)</th><th class="r">FPO Share (Rs.L)</th><th>Status</th></tr></thead>
+        <tbody id="hubTableBody"></tbody>
+      </table>
+    </div>
+    <div class="sum-bar" style="grid-template-columns:repeat(4,1fr)">
+      <div><div class="sb-val">47</div><div class="sb-lbl">Total Hubs</div></div>
+      <div><div class="sb-val">28,400</div><div class="sb-lbl">Farmers MTD</div></div>
+      <div><div class="sb-val" style="color:var(--green)">73%</div><div class="sb-lbl">Avg Utilisation</div></div>
+      <div><div class="sb-val" style="color:var(--red)">4</div><div class="sb-lbl">Hubs Critical</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============ FINANCE ============ -->
+<div id="tab-finance" class="tab-content">
+<div class="page">
+  <div class="page-title">Grant &amp; Finance: Oversight Dashboard</div>
+  <div class="page-subtitle">Real-time disbursement tracking, debt servicing status, and break-even progress</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Total AIF Sanctioned</div><div class="kpi-value">Rs. 500 Cr</div><div class="kpi-sub">47 project approvals</div></div>
+    <div class="kpi-card green"><div class="kpi-label">AIF Disbursed</div><div class="kpi-value">Rs. 312 Cr</div><div class="kpi-sub up">62.4% utilisation rate</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Revenue / Cost Ratio</div><div class="kpi-value">0.84x</div><div class="kpi-sub">Target: 1.0x by FY27-Q3</div></div>
+    <div class="kpi-card"><div class="kpi-label">Hubs at Break-even</div><div class="kpi-value">14 / 47</div><div class="kpi-sub">29.8% of operational hubs</div></div>
+    <div class="kpi-card red"><div class="kpi-label">Subsidy Leakage Risk</div><div class="kpi-value">4 Hubs</div><div class="kpi-sub dn">Flagged for audit</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">&#8377; Scheme-wise Disbursement Detail</div><button class="btn-sm">Audit Trail</button></div>
+      <div class="panel-body">
+        <div class="grant-item"><div><div class="gn">Agricultural Infrastructure Fund</div><div class="gm">Concessional debt &nbsp;&#183;&nbsp; 3% interest subvention &nbsp;&#183;&nbsp; Collateral-free loans for 47 SPVs</div><div class="gbr"><div class="gb"><div class="gf" style="width:62%;background:var(--navy-mid)"></div></div><span class="gp">62%</span></div></div><div><div class="gv">Rs. 312 Cr</div><div class="gu">Disbursed</div></div></div>
+        <div class="grant-item"><div><div class="gn">PMKSY: Integrated Cold Chain</div><div class="gm">Grant-in-aid 35-50% &nbsp;&#183;&nbsp; Max Rs. 10 Cr/project &nbsp;&#183;&nbsp; 29 projects operationalised</div><div class="gbr"><div class="gb"><div class="gf" style="width:79%;background:var(--green)"></div></div><span class="gp">79%</span></div></div><div><div class="gv">Rs. 84 Cr</div><div class="gu">Disbursed</div></div></div>
+        <div class="grant-item"><div><div class="gn">MIDH: NHM Packhouse Scheme</div><div class="gm">60:40 Centre:State &nbsp;&#183;&nbsp; Credit-linked subsidy &nbsp;&#183;&nbsp; 18 projects</div><div class="gbr"><div class="gb"><div class="gf" style="width:41%;background:var(--accent)"></div></div><span class="gp">41%</span></div></div><div><div class="gv">Rs. 37 Cr</div><div class="gu">Disbursed</div></div></div>
+        <div class="grant-item"><div><div class="gn">PMKSY: Reefer Vehicle Grant</div><div class="gm">50% subsidy on new reefer vehicles &nbsp;&#183;&nbsp; Max Rs. 50L per vehicle &nbsp;&#183;&nbsp; 88 vehicles</div><div class="gbr"><div class="gb"><div class="gf" style="width:55%;background:var(--navy-mid)"></div></div><span class="gp">55%</span></div></div><div><div class="gv">Rs. 22 Cr</div><div class="gu">Disbursed</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">&#128202; Hub SPV: Financial Structure</div></div>
+      <div class="panel-body">
+        <div class="sh">Capex Financing Per Hub (Avg. Rs. 12-14 Cr)</div>
+        <div style="display:grid;gap:8px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--blue-lighter);border:1px solid var(--border-light);border-radius:3px;font-size:13px"><span>AIF-backed Concessional Debt (60-70%)</span><strong>Rs. 8-9 Cr</strong></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--blue-lighter);border:1px solid var(--border-light);border-radius:3px;font-size:13px"><span>Private Equity: Operator + Impact Investors (20-25%)</span><strong>Rs. 2-3 Cr</strong></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--blue-lighter);border:1px solid var(--border-light);border-radius:3px;font-size:13px"><span>FPO Contribution: Land / Existing Assets (10-15%)</span><strong>Rs. 1-2 Cr</strong></div>
+        </div>
+        <div class="sh">Monthly Revenue Streams Per Hub</div>
+        <div style="display:grid;gap:6px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border-light)"><span style="color:var(--text-mid)">Pre-cooling &amp; cold storage charges</span><span style="font-weight:600">Rs. 1.8-2.4L</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border-light)"><span style="color:var(--text-mid)">Grading, sorting &amp; packaging</span><span style="font-weight:600">Rs. 0.8-1.2L</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border-light)"><span style="color:var(--text-mid)">Traceability &amp; export compliance services</span><span style="font-weight:600">Rs. 0.4-0.8L</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0"><span style="color:var(--text-mid)">Dispatch coordination &amp; PCM container rental</span><span style="font-weight:600">Rs. 0.3-0.6L</span></div>
+        </div>
+        <div style="margin-top:14px;background:var(--green-light);border:1px solid #b8dcc8;border-radius:3px;padding:10px 14px;font-size:12px;display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text-mid)">Projected Portfolio Break-even</span><strong style="color:var(--green);font-size:16px">Q3 FY2027</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============ COMPLIANCE ============ -->
+<div id="tab-compliance" class="tab-content">
+<div class="page">
+  <div class="page-title">Batch Compliance: Traceability &amp; Temperature Logs</div>
+  <div class="page-subtitle">Live batch intake feed &nbsp;&#183;&nbsp; Lot-level temperature, grade, and buyer tracking &nbsp;&#183;&nbsp; e-NWR compliant &nbsp;&#183;&nbsp; Direct World Bank LPI tracking improvement</div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi-card"><div class="kpi-label">Batches Logged (MTD)</div><div class="kpi-value">1,842</div><div class="kpi-sub up">&#9650; +18% MoM</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Grade A Compliance</div><div class="kpi-value">68%</div><div class="kpi-sub">Target: 75%</div></div>
+    <div class="kpi-card red"><div class="kpi-label">Temperature Deviations</div><div class="kpi-value">23</div><div class="kpi-sub dn">This month (auto-flagged)</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Export Rejections</div><div class="kpi-value">3</div><div class="kpi-sub">Flagged &amp; under review</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">&#8801; Live Batch Intake Feed</div>
+      <div class="panel-actions"><span class="badge b-navy">e-NWR Ready</span><button class="btn-sm">Download Logs</button><button class="btn-sm">Filter by Hub</button></div>
+    </div>
+    <div class="panel-body np">
+      <table class="data-table">
+        <thead><tr><th>Batch ID</th><th>Commodity / FPO</th><th>Hub</th><th>Grade</th><th>Temp. Log</th><th>Buyer</th><th>Destination</th><th>Action</th></tr></thead>
+        <tbody id="batchBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="infobox" style="margin-top:0">
+    <strong>Note:</strong> All batch logs are auto-synced with the National Agriculture Market (eNAM) platform and APEDA export systems. Temperature deviations above +/-2 degrees C trigger automatic alerts to hub operators and this dashboard.
+  </div>
+</div>
+</div>
+
+<!-- ============ RISK ============ -->
+<div id="tab-risk" class="tab-content">
+<div class="page">
+  <div class="page-title">Risk Register: Operational &amp; Financial Flags</div>
+  <div class="page-subtitle">Active risks requiring administrative intervention &nbsp;&#183;&nbsp; Reviewed fortnightly by District Collectors and state nodal officers</div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">&#9873; Active Risk Flags</div><span class="badge b-red">5 Open</span></div>
+      <div class="panel-body">
+        <div class="risk-item"><div class="risk-bar high"></div><div><div class="rn">Utilisation Below Threshold: Bihar Cluster (4 Hubs)</div><div class="rd">Sub-60% utilisation for 2+ consecutive weeks. AIF debt servicing gap projected at Rs. 1.2 Cr/quarter. Demand aggregation with mandis not yet formalised.</div></div><button class="rab">Escalate</button></div>
+        <div class="risk-item"><div class="risk-bar high"></div><div><div class="rn">Power Feeder Separation Pending: UP (3 Hubs)</div><div class="rd">Agricultural/domestic feeder not separated by state DISCOM. Diesel backup consuming 31% of OpEx. Intervention via State Agriculture Secretary required.</div></div><button class="rab">Escalate</button></div>
+        <div class="risk-item"><div class="risk-bar med"></div><div><div class="rn">FPO Equity Contribution Delay: Haryana SPVs</div><div class="rd">3 FPO federations behind on SPV equity tranche. SPV board quorum at risk for Q2 statutory audit. NABARD facilitation recommended.</div></div><button class="rab">Review</button></div>
+        <div class="risk-item"><div class="risk-bar med"></div><div><div class="rn">PMKSY Disbursement Lag: 7 Hubs</div><div class="rd">MOFPI disbursements averaging 8.5 months vs 6-month SLA. Cash flow stress for 7 hub operators. Interdepartmental coordination note recommended.</div></div><button class="rab">Review</button></div>
+        <div class="risk-item"><div class="risk-bar low"></div><div><div class="rn">Export Rejection: Batch TN-024 (Mango, Tamil Nadu)</div><div class="rd">UAE buyer rejected 2 MT mango consignment. Traceability log confirmed cooling unit fault at Hub TN-04. Unit replaced; consignment destroyed per FSSAI protocol.</div></div><button class="rab" style="color:var(--green);border-color:var(--green)">Resolved</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">&#10003; Mitigation Coverage</div></div>
+      <div class="panel-body">
+        <div class="mc"><div class="ml2">Offtake MoU Coverage</div><div class="mv">68%</div><div class="md">of hubs have pre-signed buyer offtake agreements with QSR chains, processors, and exporters. Target: 90% before Phase 2 rollout.</div><div class="mp"><div class="mf" style="width:68%"></div></div></div>
+        <div class="mc"><div class="ml2">Operator Certification Rate (NCCD)</div><div class="mv">82%</div><div class="md">Hub operators completed NCCD-certified temperature management training. Remaining 18% scheduled for April 2026 batch.</div><div class="mp"><div class="mf" style="width:82%"></div></div></div>
+        <div class="mc"><div class="ml2">IoT Remote Monitoring Coverage</div><div class="mv">91%</div><div class="md">Hubs with live IoT temperature and equipment sensors reporting to this dashboard in real time via NIC data exchange.</div><div class="mp"><div class="mf" style="width:91%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============ EVALUATION METRICS ============ -->
+<div id="tab-roadmap" class="tab-content">
+<div class="page">
+  <div class="page-title">Evaluation Metrics</div>
+  <div class="page-subtitle">Programme-level outcome indicators &nbsp;&#183;&nbsp; Aligned with AIF, PMKSY, and Net Zero 2070 national commitments &nbsp;&#183;&nbsp; Reviewed quarterly by MoAFW</div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">&#128202; Outcome Evaluation Framework</div>
+      <button class="btn-sm">Download</button>
+    </div>
+    <div class="panel-body np">
+      <table class="eval-table">
+        <thead>
+          <tr>
+            <th style="width:36%">Metric</th>
+            <th class="r" style="width:13%">Baseline</th>
+            <th class="r" style="width:13%">Current</th>
+            <th class="r" style="width:13%">Target</th>
+            <th style="width:25%">Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="em-name">First-Mile Spoilage Rate (%)</div></td>
+            <td class="r" style="color:var(--red)">30%</td>
+            <td class="r">21%</td>
+            <td class="r" style="color:var(--green)">&lt;10%</td>
+            <td><div class="uw"><div class="ub"><div class="uf mid" style="width:60%"></div></div><span class="up2">60%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Smallholder Realisation Gain (%)</div></td>
+            <td class="r" style="color:var(--red)">0%</td>
+            <td class="r">18%</td>
+            <td class="r" style="color:var(--green)">40%</td>
+            <td><div class="uw"><div class="ub"><div class="uf mid" style="width:45%"></div></div><span class="up2">45%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Zero-GWP Cooling Adoption Rate (%)</div></td>
+            <td class="r" style="color:var(--red)">9%</td>
+            <td class="r">91%</td>
+            <td class="r" style="color:var(--green)">100%</td>
+            <td><div class="uw"><div class="ub"><div class="uf good" style="width:91%"></div></div><span class="up2">91%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Storage Utilisation Rate (%)</div></td>
+            <td class="r" style="color:var(--red)">45%</td>
+            <td class="r">73%</td>
+            <td class="r" style="color:var(--green)">90%</td>
+            <td><div class="uw"><div class="ub"><div class="uf mid" style="width:73%"></div></div><span class="up2">73%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Institutional Credit Mobilised (Rs.)</div></td>
+            <td class="r" style="color:var(--red)">Rs. 0</td>
+            <td class="r">Rs. 48 Cr</td>
+            <td class="r" style="color:var(--green)">Rs. 500 Cr</td>
+            <td><div class="uw"><div class="ub"><div class="uf bad" style="width:10%"></div></div><span class="up2">10%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Diesel Offset Ratio (%)</div></td>
+            <td class="r" style="color:var(--red)">0%</td>
+            <td class="r">34%</td>
+            <td class="r" style="color:var(--green)">80%</td>
+            <td><div class="uw"><div class="ub"><div class="uf mid" style="width:43%"></div></div><span class="up2">43%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Value Recaptured from Post-Harvest Loss (Rs.)</div></td>
+            <td class="r" style="color:var(--red)">Rs. 0</td>
+            <td class="r">Rs. 312 Cr</td>
+            <td class="r" style="color:var(--green)">Rs. 3.77T</td>
+            <td><div class="uw"><div class="ub"><div class="uf bad" style="width:8%"></div></div><span class="up2">8%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Rural Employment Generated (No.)</div></td>
+            <td class="r" style="color:var(--red)">0</td>
+            <td class="r">47,000</td>
+            <td class="r" style="color:var(--green)">10,00,000</td>
+            <td><div class="uw"><div class="ub"><div class="uf bad" style="width:5%"></div></div><span class="up2">5%</span></div></td>
+          </tr>
+          <tr>
+            <td><div class="em-name">Supply Chain Emission Reduction (%)</div></td>
+            <td class="r" style="color:var(--red)">0%</td>
+            <td class="r">6%</td>
+            <td class="r" style="color:var(--green)">16%</td>
+            <td><div class="uw"><div class="ub"><div class="uf mid" style="width:38%"></div></div><span class="up2">38%</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div>BioGrid Governance Dashboard v1.0 &nbsp;&#183;&nbsp; Ministry of Agriculture &amp; Farmers Welfare, Government of India &nbsp;&#183;&nbsp; Classification: Restricted &nbsp;&#183;&nbsp; NIC Hosted</div>
+  <div class="footer-links">
+    <span class="fl">Data Policy</span>
+    <span class="fl">NCCD Standards</span>
+    <span class="fl">RTI</span>
+    <span class="fl">Help Desk</span>
+  </div>
+</footer>
+
+<script>
+function updateTs() {
+  const d = new Date();
+  document.getElementById('ts').textContent = d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false, timeZone:'Asia/Kolkata' }) + ' IST';
+  const el = document.getElementById('dateStr');
+  if (el) el.textContent = d.toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+}
+updateTs(); setInterval(updateTs, 1000);
+
+function go(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+const hubs = [
+  { id:'HR-01', name:'Kurukshetra Hub', state:'Haryana', cap:'20 MT', util:91, farmers:620, waste:'28%', rev:'4.2', fpo:'0.84', s:'operational' },
+  { id:'HR-02', name:'Karnal Hub', state:'Haryana', cap:'15 MT', util:87, farmers:540, waste:'24%', rev:'3.6', fpo:'0.72', s:'operational' },
+  { id:'UP-01', name:'Lucknow Hub', state:'Uttar Pradesh', cap:'20 MT', util:84, farmers:710, waste:'31%', rev:'5.1', fpo:'1.02', s:'operational' },
+  { id:'UP-02', name:'Varanasi Hub', state:'Uttar Pradesh', cap:'10 MT', util:79, farmers:490, waste:'26%', rev:'3.1', fpo:'0.62', s:'operational' },
+  { id:'MH-07', name:'Nashik Hub', state:'Maharashtra', cap:'20 MT', util:42, farmers:180, waste:'11%', rev:'1.2', fpo:'0.24', s:'critical' },
+  { id:'MH-03', name:'Pune Hub', state:'Maharashtra', cap:'15 MT', util:74, farmers:420, waste:'22%', rev:'3.4', fpo:'0.68', s:'operational' },
+  { id:'BR-01', name:'Patna Hub', state:'Bihar', cap:'10 MT', util:54, farmers:290, waste:'14%', rev:'1.8', fpo:'0.36', s:'critical' },
+  { id:'BR-02', name:'Muzaffarpur Hub', state:'Bihar', cap:'10 MT', util:58, farmers:310, waste:'16%', rev:'2.0', fpo:'0.40', s:'warning' },
+  { id:'KA-01', name:'Bengaluru Rural Hub', state:'Karnataka', cap:'20 MT', util:82, farmers:580, waste:'30%', rev:'4.8', fpo:'0.96', s:'operational' },
+  { id:'TN-01', name:'Coimbatore Hub', state:'Tamil Nadu', cap:'15 MT', util:71, farmers:380, waste:'20%', rev:'2.9', fpo:'0.58', s:'warning' },
+];
+const tb = document.getElementById('hubTableBody');
+hubs.forEach(h => {
+  const uc = h.util >= 80 ? 'good' : h.util >= 65 ? 'mid' : 'bad';
+  const sl = h.s === 'operational' ? 'On Target' : h.s === 'warning' ? 'Under Review' : 'Critical';
+  tb.innerHTML += `<tr>
+    <td><div class="cp">${h.name}</div><div class="cs">${h.id} &nbsp;&#183;&nbsp; ${h.state}</div></td>
+    <td class="r">${h.cap}</td>
+    <td><div class="uw"><div class="ub"><div class="uf ${uc}" style="width:${h.util}%"></div></div><span class="up2">${h.util}%</span></div></td>
+    <td class="r">${h.farmers.toLocaleString('en-IN')}</td>
+    <td class="r" style="color:var(--green);font-weight:600">-${h.waste}</td>
+    <td class="r">Rs.${h.rev}L</td>
+    <td class="r">Rs.${h.fpo}L</td>
+    <td><span class="status ${h.s}"><div class="sd"></div>${sl}</span></td>
+  </tr>`;
+});
+
+const batches = [
+  { id:'MH-024-A', c:'Strawberry', fpo:'Mahabaleshwar FPC', hub:'MH-02', g:'A', t:'6.2 C', tc:'tok', b:'Reliance Fresh', d:'Mumbai' },
+  { id:'HR-011-B', c:'Tomato', fpo:'Crown FPC Kurukshetra', hub:'HR-01', g:'A', t:'7.1 C', tc:'tok', b:"McDonald's India", d:'New Delhi' },
+  { id:'UP-033-C', c:'Mango (Alphonso)', fpo:'UP Horticulture FPO', hub:'UP-01', g:'B', t:'8.8 C (warn)', tc:'twarn', b:'APEDA Export Hub', d:'Dubai, UAE' },
+  { id:'KA-019-A', c:'Capsicum', fpo:'AHA LLB Karnataka', hub:'KA-01', g:'A', t:'5.9 C', tc:'tok', b:'Subway India', d:'Bengaluru' },
+  { id:'BR-007-B', c:'Banana', fpo:'Bihar Kisan FPO', hub:'BR-01', g:'B', t:'12.4 C (warn)', tc:'twarn', b:'Local Mandi', d:'Patna' },
+  { id:'TN-024-C', c:'Mango', fpo:'TN Horticulture FPO', hub:'TN-01', g:'C', t:'14.1 C (fail)', tc:'tbad', b:'UAE (Rejected)', d:'Flagged' },
+  { id:'MH-031-A', c:'Onion', fpo:'Nashik Farmers Co-op', hub:'MH-07', g:'A', t:'6.8 C', tc:'tok', b:'Export Hub', d:'Netherlands' },
+];
+const bb = document.getElementById('batchBody');
+batches.forEach(b => {
+  bb.innerHTML += `<tr>
+    <td style="font-family:monospace;font-size:12px;color:var(--navy-mid)">${b.id}</td>
+    <td><div class="cp">${b.c}</div><div class="cs">${b.fpo}</div></td>
+    <td style="font-size:12px;color:var(--text-mid)">${b.hub}</td>
+    <td><span class="gp2 g${b.g}">${b.g}</span></td>
+    <td class="${b.tc}">${b.t}</td>
+    <td style="font-size:12px">${b.b}</td>
+    <td style="font-size:12px;color:var(--text-mid)">${b.d}</td>
+    <td><button class="btn-sm">${b.g==='C'?'Review':'View Log'}</button></td>
+  </tr>`;
+});
+</script>
+</body>
+</html>
