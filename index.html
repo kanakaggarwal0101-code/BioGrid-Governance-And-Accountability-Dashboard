@@ -212,6 +212,61 @@ body { font-family: 'Noto Sans', sans-serif; background: var(--bg); color: var(-
 .eval-table tr:last-child td { border-bottom: none; }
 .eval-table tr:hover td { background: var(--blue-lighter); }
 .em-name { font-size: 13px; font-weight: 600; color: var(--navy-dark); }
+
+/* ============ RESPONSIVE: MOBILE ============ */
+@media (max-width: 768px) {
+  .gov-header-top { padding: 10px 14px; flex-wrap: wrap; gap: 10px; }
+  .gov-logo svg { width: 34px; height: 34px; }
+  .gov-titles .ministry { font-size: 11px; }
+  .gov-titles .portal { font-size: 13px; }
+  .gov-titles .dept { font-size: 10px; }
+  .header-right { width: 100%; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .user-chip { font-size: 11px; padding: 4px 8px; }
+  .ts { font-size: 10px; }
+  .nav-bar { padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .nav-bar::-webkit-scrollbar { display: none; }
+  .nav-item { padding: 10px 12px; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+  .alert-bar { padding: 8px 14px; font-size: 12px; flex-wrap: wrap; gap: 8px; }
+  .page { padding: 16px 14px; }
+  .page-title { font-size: 17px; }
+  .page-subtitle { font-size: 11px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; margin-bottom: 16px; }
+  .kpi-value { font-size: 22px; }
+  .kpi-label { font-size: 10px; }
+  .grid-2 { grid-template-columns: 1fr !important; gap: 0; }
+  .grid-3-2 { grid-template-columns: 1fr !important; gap: 0; }
+  .col { gap: 0; }
+  .panel { margin-bottom: 12px; border-radius: 3px; }
+  .panel-head { padding: 9px 12px; flex-wrap: wrap; gap: 6px; }
+  .panel-title { font-size: 12px; }
+  .panel-actions { flex-wrap: wrap; gap: 6px; }
+  .panel-body { padding: 12px; }
+  .panel-body.np { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .data-table { min-width: 520px; font-size: 12px; }
+  .data-table th, .data-table td { padding: 8px 10px; }
+  .eval-table { min-width: 480px; font-size: 12px; }
+  .eval-table th, .eval-table td { padding: 8px 10px; }
+  .grant-item { grid-template-columns: 1fr; gap: 6px; }
+  .gv { font-size: 18px; text-align: left; }
+  .gu { text-align: left; }
+  .climate-row { grid-template-columns: repeat(3, 1fr) !important; gap: 8px; }
+  .cv { font-size: 16px; }
+  .cl { font-size: 9px; }
+  .lpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .lpi-val { font-size: 20px; }
+  .risk-item { flex-wrap: wrap; gap: 8px; }
+  .rab { margin-left: 0; }
+  .map-area { height: 180px; }
+  .sum-bar { grid-template-columns: repeat(2, 1fr) !important; }
+  .footer { padding: 12px 14px; flex-direction: column; gap: 10px; text-align: center; font-size: 10px; }
+  .footer-links { flex-wrap: wrap; justify-content: center; gap: 12px; }
+}
+@media (max-width: 400px) {
+  .kpi-row { grid-template-columns: 1fr 1fr !important; }
+  .climate-row { grid-template-columns: repeat(2, 1fr) !important; }
+  .gov-titles .portal { font-size: 12px; }
+  .nav-item { padding: 9px 10px; font-size: 10px; }
+}
 </style>
 </head>
 <body>
